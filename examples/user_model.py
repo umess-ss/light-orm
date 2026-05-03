@@ -1,14 +1,18 @@
 from lightorm.model import Model
 from lightorm.fields import IntegerField, StringField
+from lightorm.db import connect
+
+connect()
 
 class User(Model):
     id = IntegerField(primary_key=True)
     name = StringField()
     age = IntegerField()
 
-u = User(name="Umesh", age=25)
+User.create_table()
+
+u = User(name="Pra Ti Vaaa", age=22)
 u.save()
 
 
-User.filter(age=25)
-User.all()
+print(User.all())

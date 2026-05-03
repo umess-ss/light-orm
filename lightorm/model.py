@@ -14,6 +14,20 @@ class Model(metaclass=ModelMeta):
             setattr(self, field_name, kwargs.get(field_name))
 
 
+    @classmethod
+    def create_table(cls):
+        columns = []
+
+        for name, field in cls.__fields__.items():
+            col = f"{name} {field.sql_type}"
+            if field.primary_key:
+                col+=" PRIMARY KEY"
+            columns.append(col)
+        
+        sql = f"CREATE TABLE IF NOT EXISTS {cls.__table__} ({', '.join(columns)});"
+        execute(sql)
+        return sql
+
     def save(self):
         """
         Generates an INSERT SQL statement.
@@ -55,8 +69,7 @@ class Model(metaclass=ModelMeta):
         """
 
         sql = f"SELECT * FROM {cls.__table__};"
-        fetch(sql)
-        return sql
+        return fetch(sql)
     
     
     
