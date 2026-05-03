@@ -49,6 +49,62 @@ class Model(metaclass=ModelMeta):
         execute(sql)
         return sql
 
+
+    
+    
+    
+    def update(self, **kwargs):
+        sets = [f"{k} = {repr(v)}" for k, v in kwargs.items()]
+        set_clause = ", ".join(sets)
+
+        # find primary key
+        pk_name = None
+        for name, field in self.__fields__.items():
+            if field.primary_key:
+                pk_name = name
+                break
+
+        if pk_name is None:
+            raise ValueError("No primary key defined for update()")
+        
+        pk_value = getattr(self, pk_name)
+
+        sql = (
+            f"UPDATE {self.__table__} "
+            f"SET {set_clause} "
+            f"WHERE {pk_name} = {repr(pk_value)}"
+        )
+
+        execute(sql)
+
+        # update the object in memory
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+        return sql
+
+
+    def delete(self):
+        pk_name = None
+        for name, field in self.__fields__.items():
+            if field.primary_key:
+                pk_name = name
+
+        if pk_name is None:
+            raise ValueError("No primary key defined for delete()")
+        
+        pk_value = getattr(self, pk_name)
+
+        sql = (
+            f"DELETE FROM {self.__table__} "
+            f"WHERE {pk_name} = {repr(pk_value)};"
+        )
+
+        execute(sql)
+        return sql
+    
+
+
     @classmethod
     def filter(cls, **kwargs):
         """
@@ -71,6 +127,29 @@ class Model(metaclass=ModelMeta):
         sql = f"SELECT * FROM {cls.__table__};"
         return fetch(sql)
     
+    @classmethod
+    def update(cls, where: dict, **kwargs):
+        sets = [f"{k} = {repr(v)}" for k, v in kwargs.items()]
+        set_clause = ", ".join(sets)
+
+        conditions = [f"{k} = {repr(v)}" for k, v in where.items()]
+        where_clause = " AND ".join(conditions)
+
+        sql = (
+            f"UPDATE {cls.__table__} "
+            f"SET {set_clause} "
+            f"WHERE {where_clause} "
+        )
+
+        execute(sql)
+        return sql
     
-    
-    
+
+    @classmethod
+    def delete(cls, where: dict):
+        conditions = [f"{k} = {repr(v)}" for k, v in where.items()]
+        where_clause = " AND ".join(conditions)
+
+        sql = f"DELETE FROM {cls.__table__} WHERE {where_clause}"
+        execute(sql)
+        return sql
