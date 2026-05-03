@@ -21,4 +21,5 @@ print(User.all())
 
 # User.delete(where={"age":30})
 
+User.update_all(age=22)
 print(User.all())

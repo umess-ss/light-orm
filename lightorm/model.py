@@ -144,6 +144,19 @@ class Model(metaclass=ModelMeta):
         execute(sql)
         return sql
     
+    @classmethod
+    def update_all(cls, **kwargs):
+        sets = [f"{k} = {repr(v)}" for k, v in kwargs.items()]
+        set_clause = ", ".join(sets)
+
+        sql = (
+            f"UPDATE {cls.__table__} "
+            f"SET {set_clause};"
+        )
+
+        execute(sql)
+        return sql
+    
 
     @classmethod
     def delete(cls, where: dict):
@@ -151,5 +164,11 @@ class Model(metaclass=ModelMeta):
         where_clause = " AND ".join(conditions)
 
         sql = f"DELETE FROM {cls.__table__} WHERE {where_clause}"
+        execute(sql)
+        return sql
+    
+    @classmethod
+    def delete_all(cls):
+        sql = f"DELETE FROM {cls.__table__};"
         execute(sql)
         return sql
