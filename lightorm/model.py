@@ -115,8 +115,8 @@ class Model(metaclass=ModelMeta):
 
         sql = f"SELECT * FROM {cls.__table__} WHERE {where_clause};"
         
-        rows = fetch(sql)
-        return rows
+        rows = execute(sql)
+        return [cls.from_row(row) for row in rows]
     
     @classmethod
     def all(cls):
@@ -125,7 +125,8 @@ class Model(metaclass=ModelMeta):
         """
 
         sql = f"SELECT * FROM {cls.__table__};"
-        return fetch(sql)
+        rows = execute(sql)
+        return [cls.from_row(row) for row in rows]
     
     @classmethod
     def update(cls, where: dict, **kwargs):
@@ -172,3 +173,18 @@ class Model(metaclass=ModelMeta):
         sql = f"DELETE FROM {cls.__table__};"
         execute(sql)
         return sql
+
+
+    # a method to convert a db row to model instance i.e tuple to user instance
+    @classmethod
+    def from_row(cls, row):
+        if row is None:
+            return None
+        
+        obj = cls()
+        for (col, _type), value in zip(cls.__fields__.items(),row):
+            setattr(obj, col, value)
+        return obj
+        
+
+    
