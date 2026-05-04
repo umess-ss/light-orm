@@ -20,5 +20,6 @@ def execute(sql):
 # a helper to fetch rows
 
 def fetch(sql):
-    cursor = execute(sql)
+    cursor = _connection.cursor()
+    cursor.execute(sql)
     return cursor.fetchall()

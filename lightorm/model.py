@@ -128,6 +128,7 @@ class Model(metaclass=ModelMeta):
         rows = execute(sql)
         return [cls.from_row(row) for row in rows]
     
+    
     @classmethod
     def update(cls, where: dict, **kwargs):
         sets = [f"{k} = {repr(v)}" for k, v in kwargs.items()]
@@ -185,6 +186,22 @@ class Model(metaclass=ModelMeta):
         for (col, _type), value in zip(cls.__fields__.items(),row):
             setattr(obj, col, value)
         return obj
+    
+    # a method to fetch - .get()
+    @classmethod
+    def get(cls, **kwargs):
+        where = [f"{k} = {repr(v)}" for k, v in kwargs.items()]
+        where_clause = " AND ".join(where)
+
+        sql = f"SELECT * FROM {cls.__table__} WHERE {where_clause}"
+        rows = fetch(sql)
+
+        if len(rows) == 0:
+            return None
+        if len(rows) > 1:
+            raise Exception("Multiple object returned")
+        
+        return cls.from_row(rows[0])
         
 
     
